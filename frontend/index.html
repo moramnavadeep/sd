@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Saree Mirror</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+  <main id="stage">
+    <video id="video" playsinline muted autoplay></video>
+    <canvas id="frozen" hidden></canvas>
+    <canvas id="overlay"></canvas>
+
+    <header id="topbar">
+      <div id="progress"><span id="stepIndex">–</span><span id="stepTitle">Starting…</span></div>
+      <div id="chips">
+        <span id="expChip" class="chip warn" hidden title="At least one model producing this guidance is experimental">EXPERIMENTAL</span>
+        <span id="localChip" class="chip ok" title="All processing on this device">ON-DEVICE</span>
+        <button id="langBtn" class="icon" aria-label="Language / భాష" title="Language / భాష">తె</button>
+        <button id="settingsBtn" class="icon" aria-label="Settings">⚙</button>
+      </div>
+    </header>
+
+    <section id="card" aria-live="polite">
+      <div id="statusRow"><span id="statusChip" class="chip">…</span><span id="stageChip" class="chip dim" hidden></span></div>
+      <p id="headline">Allow camera access to begin.</p>
+      <p id="instruction"></p>
+      <ul id="checks"></ul>
+      <div id="controls">
+        <button data-cmd="previous" data-i18n="back" title="P">◀ Back</button>
+        <button data-cmd="repeat" data-i18n="repeat" title="R">Repeat</button>
+        <button data-cmd="confirm" data-i18n="confirm" id="confirmBtn" title="C">Confirm step</button>
+        <button data-cmd="check" data-i18n="check" title="Space">Am I right?</button>
+        <button data-cmd="next" data-i18n="next" class="primary" title="N">Next ▶</button>
+        <button id="micBtn" data-i18n="voice" title="M">🎤 Voice</button>
+      </div>
+      <p id="voiceStatus" class="dim"></p>
+    </section>
+
+    <aside id="settings" hidden>
+      <h2>Settings</h2>
+      <label><span data-i18n="language">Language</span>
+        <select id="langSel"><option value="en">English</option><option value="te">తెలుగు (Telugu)</option></select>
+      </label>
+      <label>Camera <select id="cameraSel"></select></label>
+      <label>Resolution
+        <select id="resSel">
+          <option value="640x480">640 × 480</option>
+          <option value="1280x720" selected>1280 × 720</option>
+          <option value="1920x1080">1920 × 1080</option>
+        </select>
+      </label>
+      <label><input type="checkbox" id="mirrorChk" checked> Mirror view</label>
+      <label><input type="checkbox" id="syncChk"> Aligned mode (show the analysed frame; exact alignment, more lag)</label>
+      <label><input type="checkbox" id="skelChk" checked> Show body landmarks</label>
+      <label><input type="checkbox" id="regionChk" checked> Show detected saree regions</label>
+      <label>Framing box height <input type="range" id="frameH" min="50" max="98" value="88"></label>
+      <label>Framing box vertical position <input type="range" id="frameY" min="0" max="40" value="6"></label>
+      <h3>Models (all local)</h3>
+      <pre id="modelStatus">loading…</pre>
+      <h3>Live diagnostics</h3>
+      <pre id="diag"></pre>
+      <p id="privacy" class="dim"></p>
+    </aside>
+
+    <div id="fatal" hidden></div>
+  </main>
+  <script type="module" src="/static/js/app.js"></script>
+</body>
+</html>

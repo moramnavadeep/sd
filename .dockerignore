@@ -1,0 +1,12 @@
+.venv/
+.git/
+.claude/
+runs/
+data/
+models/
+recordings/
+**/__pycache__/
+*.pyc
+tests/
+training/
+data_collection/trackers/consent_register.csv

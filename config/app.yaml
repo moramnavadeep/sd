@@ -1,0 +1,53 @@
+# Runtime configuration. Everything runs on this machine; there is no cloud fallback.
+server:
+  host: 127.0.0.1          # loopback only - camera frames never leave the device
+  port: 8765
+
+tutorial: config/tutorials/nivi.yaml
+
+# Lowest model registry status the app will load (see saree_ai/registry.py).
+# 'experimental' = real-data-trained but not yet meeting acceptance targets.
+# Smoke-test models trained only on synthetic data are refused unless you start the server
+# with --allow-synthetic-models (dev only; every output is then tagged EXPERIMENTAL).
+min_model_status: experimental
+
+pose:
+  backend: auto            # auto | own | keypointrcnn | none
+  min_person_score: 0.6
+
+pleat:
+  roi_from: segmentation_then_pose   # where the pleat crop comes from
+
+stage:
+  likelihood_temper: 0.7
+
+# Confidence thresholds (section 14). Below these the app gives NEUTRAL guidance only.
+thresholds:
+  body_landmarks: 0.55     # PoseResult.confidence (person score x anchor keypoint conf)
+  keypoint: 0.30           # single keypoint usable for overlay anchoring
+  segmentation: 0.65       # SegResult.confidence (mean max-softmax on saree pixels)
+  segmentation_max_ambiguous: 0.35
+  pleat: 0.55              # PleatResult.confidence
+  stage: 0.60              # filtered stage belief
+
+corrections:
+  # A failing check must hold for >= persist_ratio of the last window frames before it is shown.
+  window: 12
+  persist_ratio: 0.7
+  # When false (default) checks that depend on an experimental model never produce a
+  # correction; they are reported as "unverified" and the user is asked to confirm manually.
+  allow_experimental_corrections: false
+
+speech:
+  min_interval_s: 6
+  repeat_suppress_s: 20
+
+voice:
+  asr_backend: vosk          # vosk | none
+  default_language: en       # en | te  (the user can switch in Settings)
+  vosk_models:
+    en: models/asr/vosk-model-small-en-us-0.15
+    te: models/asr/vosk-model-small-te-0.42
+  # Server-side TTS for languages without a local OS voice. English uses the OS voice in the browser.
+  piper_voices:
+    te: models/tts/te_IN-maya-medium.onnx

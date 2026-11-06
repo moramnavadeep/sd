@@ -1,0 +1,92 @@
+{
+  "seed": 0,
+  "dirs": [
+    "data/synthetic_v1"
+  ],
+  "participants": {
+    "train": [
+      "synth-p0031",
+      "synth-p0033",
+      "synth-p0029",
+      "synth-p0056",
+      "synth-p0013",
+      "synth-p0028",
+      "synth-p0057",
+      "synth-p0047",
+      "synth-p0052",
+      "synth-p0001",
+      "synth-p0002",
+      "synth-p0051",
+      "synth-p0044",
+      "synth-p0016",
+      "synth-p0017",
+      "synth-p0032",
+      "synth-p0024",
+      "synth-p0008",
+      "synth-p0026",
+      "synth-p0023",
+      "synth-p0018",
+      "synth-p0053",
+      "synth-p0000",
+      "synth-p0041",
+      "synth-p0036",
+      "synth-p0015",
+      "synth-p0011",
+      "synth-p0027",
+      "synth-p0034",
+      "synth-p0004",
+      "synth-p0059",
+      "synth-p0003",
+      "synth-p0022",
+      "synth-p0042",
+      "synth-p0055",
+      "synth-p0010",
+      "synth-p0009",
+      "synth-p0014",
+      "synth-p0021",
+      "synth-p0012",
+      "synth-p0054",
+      "synth-p0058",
+      "synth-p0019",
+      "synth-p0045",
+      "synth-p0037",
+      "synth-p0020",
+      "synth-p0006",
+      "synth-p0035",
+      "synth-p0025",
+      "synth-p0005",
+      "synth-p0040"
+    ],
+    "val": [
+      "synth-p0039",
+      "synth-p0043",
+      "synth-p0007",
+      "synth-p0038",
+      "synth-p0048",
+      "synth-p0046",
+      "synth-p0050",
+      "synth-p0049",
+      "synth-p0030"
+    ],
+    "test": []
+  },
+  "sample_counts": {
+    "train": {
+      "synthetic": 1428
+    },
+    "val": {
+      "synthetic": 252
+    },
+    "test": {}
+  },
+  "participant_counts": {
+    "train": 51,
+    "val": 9,
+    "test": 0
+  },
+  "notes": [
+    "No real participants: test split is EMPTY. Any metrics are synthetic-only.",
+    "9 synthetic participants placed in val (val is not real-only)."
+  ],
+  "rule": "participant-level; synthetic never in test"
+}

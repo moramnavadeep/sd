@@ -1,0 +1,47 @@
+# Recording protocol v1 — read by training/data/record_session.py
+# One SESSION = one participant, ~75-90 min. Four drapes + one pose clip.
+protocol_version: 1
+
+cameras:
+  # index = OpenCV device index on the recording laptop; check with record_session.py --list-cameras
+  - {name: front,      role: primary,   placement: "straight ahead, 2.2-2.6 m away, lens at chest height", resolution: [1280, 720], fps: 30}
+  - {name: front_left, role: secondary, placement: "30 deg to participant's left, 2.5 m, lens at eye height",  resolution: [1920, 1080], fps: 30}
+
+lighting_setups:
+  L1: "Normal indoor: ceiling light + one soft front lamp. No window behind the participant."
+  L2: "Hard / difficult: rotate per participant through dim (lamp only), backlit (window or lamp behind), warm/coloured bulb."
+
+# Drape list per session. saree: A = participant's lighter/plainer saree, B = darker/printed one.
+drapes:
+  - {id: d1, saree: A, lighting: L1, script: correct}
+  - {id: d2, saree: A, lighting: L2, script: mistakes_slot1}
+  - {id: d3, saree: B, lighting: L2, script: correct}
+  - {id: d4, saree: B, lighting: L1, script: mistakes_slot2}
+pose_clip: {seconds: 120, prompts: ["Face the camera", "Turn to your left", "Turn your back to the camera", "Turn to your right",
+                                   "Raise both arms", "Bend forward as if making pleats", "Step out of frame and back in"]}
+
+# Each mistake is performed deliberately and HELD ~20 s; the operator presses m when it is in place and m again
+# when it is corrected. Labels are exactly saree_ai.constants.CORRECTION_LABELS.
+mistakes:
+  hem_uneven:            {during_stage: waist_wrap_complete, prompt: "Pull the hem up ~10 cm on your RIGHT side only, hold, then level it."}
+  waist_wrap_loose:      {during_stage: wrapping_started,    prompt: "Leave the wrap stopping at your left hip (not all the way round), hold, then finish it."}
+  pleats_uneven_spacing: {during_stage: pleats_forming,      prompt: "Make pleats of clearly different widths (some 2 in, some 8 in), hold them spread, then redo evenly."}
+  pleats_misaligned:     {during_stage: pleats_forming,      prompt: "Let the pleat tops slip so the folds slant ~20 deg, hold, then straighten."}
+  pleats_too_few:        {during_stage: pleats_forming,      prompt: "Make only 3 wide pleats, hold, then redo with 5-7."}
+  pleats_too_many:       {during_stage: pleats_forming,      prompt: "Make 10+ narrow pleats, hold, then redo with 5-7."}
+  pleats_off_center:     {during_stage: pleats_secured,      prompt: "Tuck the pleats near your RIGHT hip, hold, then move them to the navel."}
+  pleats_not_tucked:     {during_stage: pleats_secured,      prompt: "Hold the pleats at the waist without tucking (hands visible), hold, then tuck."}
+  pallu_wrong_shoulder:  {during_stage: pallu_complete,      prompt: "Put the pallu over your RIGHT shoulder, hold, then move it to the left."}
+  pallu_not_on_shoulder: {during_stage: pallu_complete,      prompt: "Let the pallu hang from the chest without reaching the shoulder, hold, then place it."}
+  pallu_too_short:       {during_stage: pallu_complete,      prompt: "Pull the pallu up so it ends at waist height behind you, turn sideways, hold, then lengthen."}
+
+# Mistake scripts rotate with participant number so every label gets coverage.
+# participant n uses mistake_rotation[n % len] for slot1 and mistake_rotation[(n+3) % len] for slot2.
+mistake_rotation:
+  - [waist_wrap_loose, pleats_uneven_spacing, pallu_wrong_shoulder]
+  - [hem_uneven, pleats_misaligned, pleats_not_tucked]
+  - [pleats_too_few, pleats_off_center, pallu_not_on_shoulder]
+  - [hem_uneven, pleats_too_many, pallu_too_short]
+  - [waist_wrap_loose, pleats_misaligned, pleats_off_center]
+  - [pleats_uneven_spacing, pleats_not_tucked, pallu_wrong_shoulder]
+  - [pleats_too_few, pallu_not_on_shoulder, pallu_too_short]

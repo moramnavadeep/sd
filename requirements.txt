@@ -1,0 +1,20 @@
+# Runtime + training. All packages run locally; none call a hosted AI service.
+# PyTorch with CUDA: pip install torch torchvision --index-url https://download.pytorch.org/whl/cu128
+torch>=2.6
+torchvision>=0.21
+onnx>=1.17
+onnxscript
+onnxruntime>=1.20
+opencv-python>=4.10
+numpy>=1.26
+scikit-learn>=1.5
+fastapi>=0.115
+uvicorn[standard]>=0.30
+pyyaml>=6
+jsonschema>=4.22
+psutil>=5.9
+vosk>=0.3.45
+# Telugu speech output (GPL-3.0-or-later; see docs/DEPENDENCIES.md)
+piper-tts>=1.8
+pytest>=8
+httpx

@@ -1,0 +1,17 @@
+.venv/
+__pycache__/
+*.pyc
+runs/
+data/*/images/
+data/*/masks/
+models/**/*.pth
+models/**/*.onnx
+models/**/*.zip
+models/asr/
+models/torch_home/
+*.part
+
+# filled consent register never enters version control
+data_collection/trackers/consent_register.csv
+# raw recordings belong on the encrypted drive, not here
+recordings/

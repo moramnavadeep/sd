@@ -1,0 +1,8 @@
+# Model C - PleatNet, trained from scratch on pleat-region crops.
+task: pleat
+seed: 0
+data: {dirs: [data/synthetic_v1], split: data/splits/default.json, versions: []}
+model: {width: 32}
+input_size: 128
+train: {epochs: 30, batch_size: 64, lr: 0.001, weight_decay: 0.0001, num_workers: 4, device: auto}
+acceptance_targets: {quality_macro_f1: 0.70, count_acc_within_1: 0.80, secured_f1: 0.85}

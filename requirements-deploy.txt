@@ -1,0 +1,11 @@
+# Hosted (Render) image: CPU-only. torch/torchvision are installed from the CPU wheel index in the Dockerfile.
+onnxruntime>=1.20
+opencv-python-headless>=4.10
+numpy>=1.26
+fastapi>=0.115
+uvicorn[standard]>=0.30
+pyyaml>=6
+jsonschema>=4.22
+psutil>=5.9
+vosk>=0.3.45
+piper-tts>=1.8

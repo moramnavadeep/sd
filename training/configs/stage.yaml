@@ -1,0 +1,7 @@
+# Model D - draping stage MLP on interpretable features, trained from scratch.
+task: stage
+seed: 0
+data: {dirs: [data/synthetic_v1], split: data/splits/default.json, versions: []}
+model: {hidden: 64, dropout: 0.1}
+train: {epochs: 150, batch_size: 128, lr: 0.002, weight_decay: 0.0001, feature_noise: 0.03, device: auto}
+acceptance_targets: {macro_f1: 0.80, accuracy: 0.85}

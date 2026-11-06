@@ -1,0 +1,334 @@
+{
+  "models": {
+    "pose_baseline": {
+      "active": "keypointrcnn_resnet50_fpn_coco-fc266e95",
+      "versions": {
+        "keypointrcnn_resnet50_fpn_coco-fc266e95": {
+          "task": "pose_baseline",
+          "status": "pretrained_baseline",
+          "origin": "torchvision.models.detection.keypointrcnn_resnet50_fpn, KeypointRCNN_ResNet50_FPN_Weights.COCO_V1",
+          "licence": "torchvision code BSD-3-Clause; weights trained by the PyTorch team on COCO 2017 (annotations CC BY 4.0, images under individual Flickr licences). Not trained by us; we claim no ownership.",
+          "trained_from": "pretrained (third party)",
+          "file": "models/pose_baseline/keypointrcnn_resnet50_fpn_coco-fc266e95.pth",
+          "source_url": "https://download.pytorch.org/models/keypointrcnn_resnet50_fpn_coco-fc266e95.pth",
+          "version": "keypointrcnn_resnet50_fpn_coco-fc266e95",
+          "registered_at": "2026-11-06T19:32:44",
+          "sha256": "fc266e953d2b302cdcbb9ae66f71f6b0d4649928bf02dc573961e361e4918926"
+        }
+      }
+    },
+    "asr": {
+      "active": "vosk-model-small-en-us-0.15",
+      "versions": {
+        "vosk-model-small-en-us-0.15": {
+          "task": "asr",
+          "status": "pretrained_baseline",
+          "origin": "Vosk small English model 0.15 (Alpha Cephei)",
+          "licence": "Apache-2.0",
+          "trained_from": "pretrained (third party)",
+          "file": "models/asr/vosk-model-small-en-us-0.15.zip",
+          "source_url": "https://alphacephei.com/vosk/models/vosk-model-small-en-us-0.15.zip",
+          "version": "vosk-model-small-en-us-0.15",
+          "registered_at": "2026-11-06T19:33:35",
+          "sha256": "30f26242c4eb449f948e42cb302dd7a686cb29a3423a8367f99ff41780942498"
+        }
+      }
+    },
+    "pleat": {
+      "active": "20261106-194232",
+      "versions": {
+        "20261106-194232": {
+          "task": "pleat",
+          "version": "20261106-194232",
+          "file": "models/pleat/pleat-20261106-194232.onnx",
+          "status": "smoke_test_synthetic",
+          "status_reason": "trained without any real data",
+          "trained_from": "scratch",
+          "architecture": {
+            "width": 32
+          },
+          "training_config": "configs/pleat.yaml",
+          "config_sha256": "ec42284bd19e7094f25bd5016ca4911f062daa39d95e6189627316fb3cb933ac",
+          "dataset": {
+            "dirs": [
+              "data/synthetic_v1"
+            ],
+            "split_file": "data/splits/default.json",
+            "split_summary": {
+              "train": {
+                "samples": 1428,
+                "participants": 51,
+                "real": 0,
+                "synthetic": 1428
+              },
+              "val": {
+                "samples": 252,
+                "participants": 9,
+                "real": 0,
+                "synthetic": 252
+              },
+              "test": {
+                "samples": 0,
+                "participants": 0,
+                "real": 0,
+                "synthetic": 0
+              }
+            },
+            "dataset_versions": []
+          },
+          "metrics_test": {
+            "quality_macro_f1": null,
+            "count_mae": null,
+            "count_acc_within_1": null,
+            "secured_f1": null
+          },
+          "acceptance_targets": {
+            "quality_macro_f1": 0.7,
+            "count_acc_within_1": 0.8,
+            "secured_f1": 0.85
+          },
+          "onnx_parity_max_abs_diff": 3.814697265625e-06,
+          "inference_latency": {
+            "provider": "CPUExecutionProvider",
+            "median_ms": 0.5807999696116894,
+            "p95_ms": 1.1656000278890133,
+            "runs": 50
+          },
+          "limitations": [
+            "Operates on a crop located by segmentation or pose; a wrong crop gives a wrong answer.",
+            "Count is unreliable when folds overlap heavily (annotators mark count_certain=false)."
+          ],
+          "run_dir": "runs/pleat/20261106-194232",
+          "input_size": 128,
+          "registered_at": "2026-11-06T19:50:30",
+          "sha256": "13906bf8b00a4ee55ed40bc5eac39d689596ae4bbaa8559d9ce3a58bba2e90b2"
+        }
+      }
+    },
+    "segmentation": {
+      "active": "20261106-194707",
+      "versions": {
+        "20261106-194707": {
+          "task": "segmentation",
+          "version": "20261106-194707",
+          "file": "models/segmentation/segmentation-20261106-194707.onnx",
+          "status": "smoke_test_synthetic",
+          "status_reason": "trained without any real data",
+          "trained_from": "fine-tuned from torchvision ImageNet-1k MobileNetV3-Large backbone",
+          "architecture": {
+            "arch": "lraspp_mobilenet_v3",
+            "imagenet_backbone": true
+          },
+          "training_config": "configs/segmentation.yaml",
+          "config_sha256": "d409b974592bcc7f6d94e95a2b96bbd5576fe163b9a11783284579728be5a1f9",
+          "dataset": {
+            "dirs": [
+              "data/synthetic_v1"
+            ],
+            "split_file": "data/splits/default.json",
+            "split_summary": {
+              "train": {
+                "samples": 1428,
+                "participants": 51,
+                "real": 0,
+                "synthetic": 1428
+              },
+              "val": {
+                "samples": 252,
+                "participants": 9,
+                "real": 0,
+                "synthetic": 252
+              },
+              "test": {
+                "samples": 0,
+                "participants": 0,
+                "real": 0,
+                "synthetic": 0
+              }
+            },
+            "dataset_versions": []
+          },
+          "metrics_test": {
+            "miou": null,
+            "miou_saree": null,
+            "macro_f1": null
+          },
+          "acceptance_targets": {
+            "miou_saree": 0.6,
+            "macro_f1": 0.7
+          },
+          "onnx_parity_max_abs_diff": 7.756054401397705e-06,
+          "inference_latency": {
+            "provider": "CPUExecutionProvider",
+            "median_ms": 5.048449995229021,
+            "p95_ms": 5.952814995544031,
+            "runs": 50
+          },
+          "limitations": [
+            "Trained on the data listed in dataset; untested on fabrics/lighting not represented there.",
+            "Pixel classes are semantic regions; individual overlapping pleats are not separated.",
+            "Sheer/translucent fabric over other clothing is inherently ambiguous."
+          ],
+          "run_dir": "runs/segmentation/20261106-194707",
+          "input_hw": [
+            384,
+            256
+          ],
+          "registered_at": "2026-11-06T19:50:47",
+          "sha256": "aae7cfcda7c99ff7446c268ca914e2291351de703732f03e67cde6813170066b"
+        }
+      }
+    },
+    "stage": {
+      "active": "20261106-194207",
+      "versions": {
+        "20261106-194207": {
+          "task": "stage",
+          "version": "20261106-194207",
+          "file": "models/stage/stage-20261106-194207.onnx",
+          "status": "smoke_test_synthetic",
+          "status_reason": "trained without any real data",
+          "trained_from": "scratch",
+          "architecture": {
+            "hidden": 64,
+            "dropout": 0.1
+          },
+          "training_config": "configs/stage.yaml",
+          "config_sha256": "5d4fbbe652449a0e39e9ec3ab6788e5d672e17df4e9b5fb4871c5b30fe97360b",
+          "dataset": {
+            "dirs": [
+              "data/synthetic_v1"
+            ],
+            "split_file": "data/splits/default.json",
+            "split_summary": {
+              "train": {
+                "samples": 1428,
+                "participants": 51,
+                "real": 0,
+                "synthetic": 1428
+              },
+              "val": {
+                "samples": 252,
+                "participants": 9,
+                "real": 0,
+                "synthetic": 252
+              },
+              "test": {
+                "samples": 0,
+                "participants": 0,
+                "real": 0,
+                "synthetic": 0
+              }
+            },
+            "dataset_versions": []
+          },
+          "metrics_test": null,
+          "acceptance_targets": {
+            "macro_f1": 0.8,
+            "accuracy": 0.85
+          },
+          "onnx_parity_max_abs_diff": 3.5762786865234375e-07,
+          "inference_latency": {
+            "provider": "CPUExecutionProvider",
+            "median_ms": 0.021899992134422064,
+            "p95_ms": 0.029460017685778425,
+            "runs": 50
+          },
+          "limitations": [
+            "Features from ground-truth annotations at training time; predictions at runtime (domain gap).",
+            "Front camera only; stages that differ mainly at the back are not separable."
+          ],
+          "run_dir": "runs/stage/20261106-194207",
+          "feature_norm": {
+            "mean": [
+              0.3151814341545105,
+              0.2183065414428711,
+              0.14741671085357666,
+              0.21920903027057648,
+              0.01831180788576603,
+              0.06807929277420044,
+              0.013494844548404217,
+              0.028068343177437782,
+              0.013648008927702904,
+              0.5446428656578064,
+              0.06534124910831451,
+              0.014132234267890453,
+              0.7077328562736511,
+              0.29389873147010803,
+              0.2202380895614624,
+              0.1101190447807312,
+              0.0863095223903656,
+              0.127976194024086,
+              0.3928571343421936,
+              0.6332162618637085,
+              0.7150654196739197,
+              0.5961385369300842,
+              1.0
+            ],
+            "std": [
+              0.07047826051712036,
+              0.03978920727968216,
+              0.1291942447423935,
+              0.11262765526771545,
+              0.011914631351828575,
+              0.0659530833363533,
+              0.025918826460838318,
+              0.09071232378482819,
+              0.0664142444729805,
+              0.4990004599094391,
+              0.21849213540554047,
+              0.12743757665157318,
+              0.37762075662612915,
+              0.2924467623233795,
+              0.41540995240211487,
+              0.3140377104282379,
+              0.28181883692741394,
+              0.3350631296634674,
+              0.4893854558467865,
+              0.21644528210163116,
+              0.3427153527736664,
+              0.050507329404354095,
+              0.0010000000474974513
+            ]
+          },
+          "registered_at": "2026-11-06T19:50:56",
+          "sha256": "63c586428d2b1ff3ad0809b4a245d42ed3845dc25fe7f711ae5bb26449744190"
+        }
+      }
+    },
+    "asr_te": {
+      "active": "vosk-model-small-te-0.42",
+      "versions": {
+        "vosk-model-small-te-0.42": {
+          "task": "asr_te",
+          "status": "pretrained_baseline",
+          "origin": "Vosk small Telugu model 0.42 (Alpha Cephei); published WER 87.9 on Fleurs (open dictation)",
+          "licence": "Apache-2.0",
+          "trained_from": "pretrained (third party)",
+          "file": "models/asr/vosk-model-small-te-0.42.zip",
+          "source_url": "https://alphacephei.com/vosk/models/vosk-model-small-te-0.42.zip",
+          "version": "vosk-model-small-te-0.42",
+          "registered_at": "2026-11-06T20:24:36",
+          "sha256": "3e77b05becc7599a596ccebd8b22cb95eb4eca0cfca524827cdfbfd66af09497"
+        }
+      }
+    },
+    "tts_te": {
+      "active": "te_IN-maya-medium",
+      "versions": {
+        "te_IN-maya-medium": {
+          "task": "tts_te",
+          "status": "pretrained_baseline",
+          "origin": "Piper voice te_IN-maya-medium (rhasspy/piper-voices), fine-tuned from en_US lessac on IIT Madras IndicTTS",
+          "licence": "voice repo MIT; training data IndicTTS licence UNVERIFIED (PDF unreachable 2026-11-06) - research/personal use only until checked; runtime piper-tts GPL-3.0-or-later",
+          "trained_from": "pretrained (third party)",
+          "file": "models/tts/te_IN-maya-medium.onnx",
+          "source_url": "https://huggingface.co/rhasspy/piper-voices/resolve/main/te/te_IN/maya/medium/te_IN-maya-medium.onnx",
+          "version": "te_IN-maya-medium",
+          "registered_at": "2026-11-06T20:25:32",
+          "sha256": "c3518ad4e3ca8ea6059c1e002f3772068f634960f58b237a96ff629db1c6200e"
+        }
+      }
+    }
+  }
+}

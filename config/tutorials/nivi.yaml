@@ -1,0 +1,98 @@
+# Nivi drape tutorial. Directions ("left"/"right") are always the USER's own left/right.
+# Fabric direction used throughout: tuck right of navel -> across the front to the left ->
+# around the back -> back to the front from the right. Pleats face left. Pallu goes from the
+# right hip diagonally across the chest over the LEFT shoulder.
+#
+# expected_stage: stage the recogniser should report while the user is doing this step
+# done_stage:     stage that means this step is finished (used to *suggest* moving on;
+#                 the app never auto-advances without the user saying "next")
+# checks:         ids implemented in saree_ai/correction/checks.py (params optional)
+# guides:         overlay primitives built from live landmarks in saree_ai/correction/guides.py
+id: nivi
+name: Nivi drape
+version: 1
+steps:
+  - id: setup
+    title: Get ready
+    instruction: Wear your blouse and a petticoat tied firmly at the waist. Stand inside the frame so your head and feet are both visible.
+    speech: Put on your blouse and petticoat, then stand so I can see you from head to feet.
+    expected_stage: not_started
+    done_stage: null
+    checks: [full_body_visible]
+    guides: [frame_box]
+
+  - id: tuck_start
+    title: Tuck the plain end
+    instruction: Find the plain end of the saree (opposite the pallu). Tuck its top edge into the petticoat just to the right of your navel. The bottom edge should just touch the floor.
+    speech: Tuck the plain end of the saree into your petticoat, just to the right of your navel.
+    expected_stage: wrapping_started
+    done_stage: wrapping_started
+    checks: [full_body_visible]
+    guides: [tuck_start_marker, hem_line]
+
+  - id: wrap_waist
+    title: Wrap once around the waist
+    instruction: Take the fabric across the front to your left, around your back, and bring it back to the front from your right. Keep tucking the top edge as you go and keep the hem level.
+    speech: Wrap the saree across the front to your left, around your back, and back to the front. Keep the hem level with the floor.
+    expected_stage: waist_wrap_complete
+    done_stage: waist_wrap_complete
+    checks: [full_body_visible, waist_wrap_coverage, hem_level]
+    guides: [wrap_arrow, hem_line]
+
+  - id: form_pleats
+    title: Make the front pleats
+    instruction: Make 5 to 7 pleats, each about 5 inches (12 cm) wide, folding towards your left. Keep the top edges together and the folds straight up and down.
+    speech: Now make five to seven even pleats, about five inches wide each, folding towards your left. Keep them straight.
+    expected_stage: pleats_forming
+    done_stage: pleats_forming
+    checks:
+      - full_body_visible
+      - {id: pleat_count, min: 5, max: 9}
+      - {id: pleat_spacing, max_cv: 0.35}
+      - {id: pleat_alignment, max_dev_deg: 8, max_tilt_deg: 12}
+    guides: [pleat_zone, pleat_folds]
+
+  - id: tuck_pleats
+    title: Tuck the pleats
+    instruction: Hold the pleats together and tuck them into the petticoat at your navel, slightly to the left, with the folds facing left. Check the pleats fall straight to the floor.
+    speech: Tuck the pleats into your petticoat at your navel, slightly to the left, with the folds facing left.
+    expected_stage: pleats_secured
+    done_stage: pleats_secured
+    checks:
+      - full_body_visible
+      - {id: pleat_center, target: 0.10, tolerance: 0.35}
+      - pleats_tucked
+      - {id: pleat_alignment, max_dev_deg: 8, max_tilt_deg: 12}
+    guides: [pleat_tuck_marker, pleat_zone, pleat_folds]
+
+  - id: drape_pallu
+    title: Bring the pallu over the shoulder
+    instruction: Take the remaining fabric around your back once more, bring it to the front under your right arm, and drape it diagonally across your chest over your left shoulder.
+    speech: Take the rest of the saree around your back, bring it under your right arm, and lay it across your chest over your left shoulder.
+    expected_stage: pallu_in_progress
+    done_stage: pallu_complete
+    checks: [full_body_visible, {id: pallu_shoulder, require_on_shoulder: false}]
+    guides: [pallu_path]
+
+  - id: finish
+    title: Adjust and pin the pallu
+    instruction: Let the pallu fall behind you to about the back of your knees. Pin it to your blouse at the left shoulder. Turn sideways to check the length.
+    speech: Let the pallu hang to about the back of your knees and pin it at your left shoulder.
+    expected_stage: pallu_complete
+    done_stage: pallu_complete
+    checks: [full_body_visible, pallu_shoulder, pallu_length_manual]
+    guides: [shoulder_pin_marker, pallu_path]
+
+explanations:
+  pleats: >
+    Pleats are made from the fabric between the waist wrap and the pallu. Hold the top edge,
+    fold about 5 inches of fabric back and forth like a fan, 5 to 7 times, all folding towards
+    your left. Keep the top edges lined up so the folds hang straight. Then hold the stack at the
+    top and tuck it in at your navel.
+  pallu: >
+    The pallu is the decorated end of the saree. After the pleats are tucked, take the remaining
+    fabric around your back once more, bring it to the front under your right arm, and lay it
+    diagonally across your chest so it falls over your left shoulder to about the back of your knees.
+  wrap: >
+    Start by tucking the plain end just right of your navel. Take the fabric across the front to
+    your left, around your back, and back to the front. Tuck the top edge all the way round.

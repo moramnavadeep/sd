@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "saree_ai/sample.schema.json",
+  "title": "Saree draping dataset sample (one image or one video frame)",
+  "description": "One line of manifest.jsonl. Paths are relative to the dataset root. Pixel coordinates are in the original image resolution.",
+  "type": "object",
+  "required": ["id", "image", "width", "height", "participant_id", "source"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {"type": "string", "minLength": 1},
+    "schema_version": {"type": "string"},
+    "image": {"type": "string", "description": "Relative path to RGB image (jpg/png)."},
+    "width": {"type": "integer", "minimum": 1},
+    "height": {"type": "integer", "minimum": 1},
+    "video_id": {"type": ["string", "null"], "description": "Shared by all frames from one recording."},
+    "frame_index": {"type": ["integer", "null"], "minimum": 0},
+    "timestamp_ms": {"type": ["number", "null"]},
+    "participant_id": {"type": "string", "minLength": 1, "description": "Pseudonymous id. Train/val/test splits are made at this level."},
+
+    "source": {
+      "type": "object",
+      "required": ["type"],
+      "additionalProperties": false,
+      "properties": {
+        "type": {"enum": ["real", "synthetic"]},
+        "consent_id": {"type": ["string", "null"], "description": "Required for real data: reference to a signed consent record (not the record itself)."},
+        "license": {"type": ["string", "null"]},
+        "collector": {"type": ["string", "null"]},
+        "generator": {"type": ["string", "null"], "description": "For synthetic data: generator name + version + seed."}
+      }
+    },
+
+    "capture": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "camera_angle": {"enum": ["front", "front_left", "front_right", "left", "right", "back", "other", null]},
+        "camera_height": {"enum": ["low", "chest", "eye", "high", null]},
+        "lighting": {"enum": ["bright", "normal", "dim", "backlit", "mixed", "colored", null]},
+        "body_position": {"enum": ["standing", "bending", "turning", "seated", "other", null]},
+        "device": {"type": ["string", "null"]}
+      }
+    },
+
+    "saree": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "primary_color": {"type": ["string", "null"]},
+        "darkness": {"enum": ["light", "medium", "dark", null]},
+        "fabric": {"enum": ["cotton", "silk", "chiffon", "georgette", "synthetic", "linen", "net", "other", null]},
+        "pattern": {"enum": ["plain", "printed", "woven_border", "embroidered", "checked", "striped", "other", null]},
+        "transparency": {"enum": ["opaque", "translucent", "sheer", null]},
+        "drape_style": {"enum": ["nivi", "other", null]}
+      }
+    },
+
+    "mask": {"type": ["string", "null"], "description": "Relative path to single-channel PNG; pixel value = index into SEG_CLASSES, 255 = ignore."},
+
+    "landmarks": {
+      "type": ["array", "null"],
+      "description": "17 COCO keypoints [x, y, v]; v: 0 = not labelled, 1 = labelled but occluded, 2 = visible.",
+      "minItems": 17, "maxItems": 17,
+      "items": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"type": "number"}}
+    },
+
+    "regions": {
+      "type": ["array", "null"],
+      "description": "Optional polygon form of the saree regions (used to rasterise masks if no PNG is supplied).",
+      "items": {
+        "type": "object",
+        "required": ["class", "polygon"],
+        "additionalProperties": false,
+        "properties": {
+          "class": {"enum": ["person", "other_clothing", "saree_body", "waist_wrap", "pleats", "pallu"]},
+          "polygon": {"type": "array", "minItems": 3, "items": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "number"}}},
+          "occluded_by_hand": {"type": "boolean"}
+        }
+      }
+    },
+
+    "pleats": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "visible": {"type": "boolean"},
+        "roi": {"type": ["array", "null"], "minItems": 4, "maxItems": 4, "items": {"type": "number"}, "description": "[x0, y0, x1, y1] box around the pleat stack."},
+        "fold_lines": {"type": "array", "description": "One polyline per visible pleat fold edge, top to bottom.", "items": {"type": "array", "items": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "number"}}}},
+        "count": {"type": ["integer", "null"], "minimum": 0, "maximum": 30},
+        "count_certain": {"type": "boolean", "description": "False when folds overlap so heavily that the annotator could not count them."},
+        "quality": {"enum": ["neat", "uneven_spacing", "misaligned", "loose_or_unformed", null]},
+        "secured": {"type": ["boolean", "null"], "description": "True once the pleat stack is tucked at the waist."}
+      }
+    },
+
+    "step_label": {"enum": ["not_started", "wrapping_started", "waist_wrap_complete", "pleats_forming", "pleats_secured", "pallu_in_progress", "pallu_complete", null]},
+    "step_label_certain": {"type": "boolean"},
+
+    "correction_labels": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"enum": ["hem_uneven", "waist_wrap_loose", "pleats_uneven_spacing", "pleats_misaligned", "pleats_off_center", "pleats_too_few", "pleats_too_many", "pleats_not_tucked", "pallu_wrong_shoulder", "pallu_not_on_shoulder", "pallu_too_short"]}
+    },
+
+    "annotator": {"type": ["string", "null"]},
+    "review_status": {"enum": ["draft", "reviewed", "disputed", null]},
+    "notes": {"type": ["string", "null"]}
+  }
+}

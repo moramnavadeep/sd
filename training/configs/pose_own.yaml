@@ -1,0 +1,9 @@
+# Model A' - our own top-down pose network (replacement for the pretrained baseline).
+# NOT trained by default. Needs landmark-annotated real data (see docs/DATASET.md).
+task: pose_own
+seed: 0
+data: {dirs: [data/real_v1], split: data/splits/default.json, versions: []}
+model: {imagenet_backbone: true}
+input_hw: [256, 192]
+train: {epochs: 140, batch_size: 32, lr: 0.001, weight_decay: 0.0001, num_workers: 6, device: auto}
+acceptance_targets: {"pck@0.2": 0.90}

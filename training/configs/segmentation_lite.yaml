@@ -1,0 +1,7 @@
+task: segmentation
+seed: 0
+data: {dirs: [data/synthetic_v1], split: data/splits/default.json, versions: []}
+model: {arch: tiny_unet, base: 16}
+input_hw: [256, 160]
+train: {epochs: 60, batch_size: 32, lr: 0.002, weight_decay: 0.0001, num_workers: 4, amp: true, device: auto}
+acceptance_targets: {miou_saree: 0.55, macro_f1: 0.65}
