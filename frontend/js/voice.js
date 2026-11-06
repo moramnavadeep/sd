@@ -112,7 +112,7 @@ export class LocalVoice {
       const m = JSON.parse(e.data);
       if (m.type === 'asr_unavailable') { this.onStatus?.(`Voice commands unavailable: ${m.detail}`); this.stopListening(true); }
       if (m.type === 'asr_ready') this.onStatus?.(this.mode === 'browser'
-        ? (this.lang === 'te' ? 'వింటున్నాను — తెలుగు ఆదేశాలు ఈ యాప్ సర్వర్‌లో గుర్తించబడతాయి' : 'Listening — recognised on this app's server')
+        ? (this.lang === 'te' ? 'వింటున్నాను — తెలుగు ఆదేశాలు ఈ యాప్ సర్వర్‌లో గుర్తించబడతాయి' : "Listening — recognised on this app's server")
         : `Listening on-device (${m.languages.join(' + ')})`);
       if (m.type === 'transcript') this.onTranscript?.(m);
     };
