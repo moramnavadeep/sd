@@ -84,7 +84,7 @@ class LiteModels:
 def create_app(cfg: dict) -> FastAPI:
     lite = bool(cfg.get("lite"))
     info = hardware.inspect(gpu=not lite)
-    sel = hardware.choose_profile(info)
+    sel = hardware.choose_profile(info, need_ort=not lite)
     vcfg = cfg.get("voice", {})
     if lite:
         # English recognition runs in the visitor's browser (frontend/asr). The 2022 browser engine cannot decode

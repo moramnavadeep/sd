@@ -43,14 +43,14 @@ def inspect(gpu: bool = True) -> dict:
     return info
 
 
-def choose_profile(info: dict) -> dict:
+def choose_profile(info: dict, need_ort: bool = True) -> dict:
     """'full' = GPU pose baseline + LR-ASPP segmentation; 'lite' = CPU everything at lower res."""
     problems = []
     if info.get("ram_gb") is not None and info["ram_gb"] < MIN_RAM_GB:
         problems.append(f"Only {info['ram_gb']} GB RAM; at least {MIN_RAM_GB} GB is required.")
     if (info.get("cpu_logical") or 0) < MIN_CPU_CORES:
         problems.append(f"Only {info.get('cpu_logical')} CPU threads; at least {MIN_CPU_CORES} are required.")
-    if not info.get("onnxruntime"):
+    if need_ort and not info.get("onnxruntime"):   # lite mode runs no ONNX models on the server
         problems.append("onnxruntime is not installed: run `pip install -r requirements.txt`.")
     gpu = bool(info.get("cuda")) and (info.get("gpu_mem_gb") or 0) >= 3.5
     profile = "full" if gpu else "lite"

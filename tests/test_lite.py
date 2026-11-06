@@ -25,6 +25,7 @@ def client():
 def test_lite_status_and_privacy(client):
     st = client.get("/api/status").json()
     assert st["lite"] and st["hosted"]
+    assert st["selection"]["meets_minimum"], st["selection"]["problems"]   # live site showed a false "device too weak"
     assert all(not m["available"] for m in st["models"].values())
     assert "camera picture never leaves your device" in st["privacy"]
     assert "Telugu voice commands are recognised on this app's server" in st["privacy"]
