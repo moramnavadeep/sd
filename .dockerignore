@@ -10,3 +10,6 @@ recordings/
 tests/
 training/
 data_collection/trackers/consent_register.csv
+frontend/asr/
+frontend/tts/
+frontend/_test/

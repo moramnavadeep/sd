@@ -1,0 +1,8 @@
+# Free online demo runtime (lite mode): no ML runtimes on the server.
+fastapi>=0.115
+uvicorn[standard]>=0.30
+pyyaml>=6
+numpy>=1.26
+opencv-python-headless>=4.10
+psutil>=5.9
+vosk>=0.3.45      # Telugu command recognition on the server

@@ -34,6 +34,12 @@ export class LocalVoice {
     this.chunksSent = 0;
     this.lang = 'en'; this.serverTTS = {};   // lang -> available on the local server
     this.audio = null;
+    // 'server': mic PCM -> our server's Vosk.  'browser': Vosk compiled to WebAssembly runs in this page
+    // (free-hosting mode), so the audio never leaves the device.
+    this.mode = 'server';
+    this.ttsMode = 'server';                 // 'server' (/api/tts) | 'prerendered' (/static/tts/<lang>/<sha1>.wav)
+    this.models = {};                        // lang -> Promise<Vosk model> (browser mode)
+    this.serverASR = {};                     // lang -> recognised on the server even in browser mode (Telugu)
     this.pickVoice();
     if ('speechSynthesis' in window) speechSynthesis.onvoiceschanged = () => this.pickVoice();
   }
@@ -45,6 +51,7 @@ export class LocalVoice {
   get ttsAvailable() { return this.lang === 'en' ? !!this.voice : !!this.serverTTS[this.lang]; }
   ttsLabel() {
     if (this.lang === 'en') return this.voice ? `on-device voice: ${this.voice.name}` : 'no local English voice installed — text only';
+    if (this.ttsMode === 'prerendered') return 'pre-recorded Piper voice for the tutorial sentences';
     return this.serverTTS[this.lang] ? 'on-device Piper voice (local server)' : 'no local voice for this language — text only';
   }
   // The mic is muted while we talk (so we don't hear ourselves). This used to rely only on the
@@ -73,7 +80,10 @@ export class LocalVoice {
     this.speakingUntil = performance.now() + 2000 + text.length * 120;   // mute mic meanwhile (upper bound)
     const myAudio = new Audio();
     this.audio = myAudio;
-    fetch('/api/tts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text, lang }) })
+    const get = this.ttsMode === 'prerendered'
+      ? sha1(text.trim()).then(h => fetch(`/static/tts/${lang}/${h}.wav`))       // generated at build time
+      : fetch('/api/tts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text, lang }) });
+    get
       .then(r => { if (!r.ok) throw new Error(`tts ${r.status}`); return r.blob(); })
       .then(b => {
         if (this.audio !== myAudio) return;                               // superseded by newer speech
@@ -94,13 +104,16 @@ export class LocalVoice {
     if (this.listening) return;
     // Microphone first: if it is refused there is nothing to clean up (previously a dead audio socket was left open).
     const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, channelCount: 1 } });
+    if (this.mode === 'browser' && !this.serverASR[this.lang]) return this.startBrowserListening(stream);
     this.onStatus?.('Starting on-device listening…');
     const ws = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/ws/audio?lang=${encodeURIComponent(this.lang)}`);
     ws.binaryType = 'arraybuffer';
     ws.onmessage = (e) => {
       const m = JSON.parse(e.data);
       if (m.type === 'asr_unavailable') { this.onStatus?.(`Voice commands unavailable: ${m.detail}`); this.stopListening(true); }
-      if (m.type === 'asr_ready') this.onStatus?.(`Listening on-device (${m.languages.join(' + ')})`);
+      if (m.type === 'asr_ready') this.onStatus?.(this.mode === 'browser'
+        ? (this.lang === 'te' ? 'వింటున్నాను — తెలుగు ఆదేశాలు ఈ యాప్ సర్వర్‌లో గుర్తించబడతాయి' : 'Listening — recognised on this app's server')
+        : `Listening on-device (${m.languages.join(' + ')})`);
       if (m.type === 'transcript') this.onTranscript?.(m);
     };
     try {
@@ -125,11 +138,64 @@ export class LocalVoice {
     ws.onclose = () => { if (this.listening) { this.onStatus?.('Voice connection to the local server closed — press Voice to restart'); this.stopListening(true); } };
     Object.assign(this, { ws, stream, ctx, node, listening: true });
   }
+  // ---------------------------------------------------------------- in-browser recognition (WASM Vosk)
+  async loadModel(lang) {
+    if (!window.Vosk) await new Promise((res, rej) => {
+      const s = document.createElement('script'); s.src = '/static/vendor/vosk-browser-0.0.8.js';
+      s.onload = res; s.onerror = () => rej(new Error('could not load the speech engine')); document.head.appendChild(s);
+    });
+    if (!this.models[lang]) {
+      this.onStatus?.(lang === 'te' ? 'తెలుగు వాయిస్ మోడల్ డౌన్‌లోడ్ అవుతోంది (~60 MB, ఒక్కసారి మాత్రమే)…'
+                                    : 'Downloading the speech model (~40 MB, first time only)…');
+      this.models[lang] = Vosk.createModel(`/static/asr/${lang}.tar.gz`);
+      this.models[lang].catch(() => { delete this.models[lang]; });
+    }
+    return this.models[lang];
+  }
+  async startBrowserListening(stream) {
+    const lang = this.lang;
+    let rec;
+    try {
+      const [model, grammar] = await Promise.all([this.loadModel(lang), fetch(`/api/grammar?lang=${lang}`).then(r => r.json())]);
+      rec = new model.KaldiRecognizer(16000, JSON.stringify(grammar.phrases));
+    } catch (e) { stream.getTracks().forEach(t => t.stop()); throw e; }
+    // The 2022 WASM build returns an EMPTY final result for Telugu words although its live partial result
+    // is correct (seen in testing). Use the last partial when the final text is empty.
+    let lastPartial = '';
+    rec.on('partialresult', (m) => { if (m.result.partial) lastPartial = m.result.partial; });
+    rec.on('result', (m) => {
+      const text = ((m.result && m.result.text) || lastPartial).trim(); lastPartial = '';
+      if (text) this.onTranscript?.({ text, intent: null, asr_lang: lang, source: 'browser' });
+    });
+    const ctx = new AudioContext();
+    await ctx.audioWorklet.addModule(URL.createObjectURL(new Blob([WORKLET], { type: 'text/javascript' })));
+    if (ctx.state !== 'running') { try { await ctx.resume(); } catch { /* resumed on first click */ } }
+    const src = ctx.createMediaStreamSource(stream);
+    const node = new AudioWorkletNode(ctx, 'pcm16');
+    node.port.onmessage = (e) => {
+      const pcm = new Int16Array(e.data);
+      let s = 0; for (let i = 0; i < pcm.length; i++) s += (pcm[i] / 32768) ** 2;
+      const muted = this.speaking;
+      if (!muted) rec.acceptWaveformFloat(Float32Array.from(pcm), 16000);   // int16-range floats, as Vosk expects
+      else lastPartial = '';
+      this.onLevel?.(Math.sqrt(s / Math.max(1, pcm.length)), muted);
+    };
+    const sink = ctx.createGain(); sink.gain.value = 0;
+    src.connect(node); node.connect(sink); sink.connect(ctx.destination);
+    Object.assign(this, { rec, stream, ctx, node, listening: true });
+    this.onStatus?.(lang === 'te' ? 'మీ బ్రౌజర్‌లోనే వింటున్నాను (తెలుగు)' : 'Listening in your browser (English)');
+  }
   stopListening(quiet = false) {
     this.listening = false;
     this.ws?.close(); this.stream?.getTracks().forEach(t => t.stop()); this.ctx?.close();
-    this.ws = this.stream = this.ctx = null;
+    try { this.rec?.remove(); } catch { /* already gone */ }
+    this.ws = this.stream = this.ctx = this.rec = null;
     this.onLevel?.(0, false);
     if (!quiet) this.onStatus?.('Voice off');
   }
+}
+
+async function sha1(text) {
+  const d = await crypto.subtle.digest('SHA-1', new TextEncoder().encode(text));
+  return [...new Uint8Array(d)].map(b => b.toString(16).padStart(2, '0')).join('');
 }

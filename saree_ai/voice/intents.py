@@ -132,7 +132,7 @@ def check_answer(g: dict | None, lang: str = "en") -> str:
     (whose messages are already rendered in the session language)."""
     r = lambda m: render(m, lang)  # noqa: E731
     if not g:
-        return r(T("I haven't seen a camera frame yet."))
+        return r(T("I can't check this step from the camera here. When it looks right to you, say confirm or next."))
     st = g["status"]
     if st == "need_position":
         return r(T("I can't see you well enough to check.")) + " " + g["headline"]

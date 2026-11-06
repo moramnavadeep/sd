@@ -79,6 +79,7 @@ function connect() {
 
 const capCanvas = document.createElement('canvas');
 async function sendFrame() {
+  if (S.status?.lite) return;   // free demo: no vision models on the server, frames never sent
   if (!S.ws || S.ws.readyState !== 1 || S.inFlight || video.readyState < 2) return;
   const vw = video.videoWidth, vh = video.videoHeight;
   const s = Math.min(1, S.captureLong / Math.max(vw, vh));
@@ -102,6 +103,7 @@ function onMessage(m) {
   if (m.type === 'error') { S.inFlight = false; return; }
   if (m.type === 'busy') { S.busy = true; $('headline').textContent = m.detail; setStatus('warn', '—'); return; }
   if (m.type === 'voice') { onVoiceReply(m); return; }
+  if (m.type === 'heard') { $('voiceStatus').textContent = `${tr(S.lang, 'heard')}: “${m.text}” → ${tr(S.lang, 'not_command')}`; return; }
   if (m.type !== 'result') return;
   S.inFlight = false;
   const now = performance.now();
@@ -202,6 +204,7 @@ function showStep(st) {
   $('stepIndex').textContent = `${st.index + 1}/${st.total}`; $('stepTitle').textContent = st.title; $('instruction').textContent = st.instruction;
 }
 function onVoiceReply(m) {
+  if (m.heard && m.heard.text) $('voiceStatus').textContent = `${tr(S.lang, 'heard')}: “${m.heard.text}” → ${m.intent ?? tr(S.lang, 'not_command')}`;
   if (m.speech) { voice.speak(m.speech); $('headline').textContent = m.speech; }
   if (m.show_guide) { S.highlight = m.show_guide; S.highlightUntil = performance.now() + 8000; }
   showStep(m.step);
@@ -209,6 +212,11 @@ function onVoiceReply(m) {
 }
 const voice = new LocalVoice({
   onTranscript: (t) => {
+    if (t.source === 'browser') {          // browser recognition: the server parses the text into a command
+      if (S.ws?.readyState === 1) S.ws.send(JSON.stringify({ type: 'utterance', text: t.text }));
+      $('voiceStatus').textContent = `${tr(S.lang, 'heard')}: “${t.text}”…`;
+      return;
+    }
     let note = `${tr(S.lang, 'heard')}: “${t.text}” → ${t.intent ?? tr(S.lang, 'not_command')}`;
     if (t.intent) {
       if (S.ws?.readyState === 1) S.ws.send(JSON.stringify({ type: 'utterance', text: t.text, intent: t.intent }));
@@ -323,6 +331,10 @@ async function loadStatus() {
   const lines = Object.entries(st.models).map(([k, v]) => `${k}: ${v.available ? 'loaded' : 'NOT available'}${v.experimental ? ' [experimental]' : ''}\n   ${v.detail}${v.version ? ' v' + v.version : ''}`);
   if (!S.lang) S.lang = st.default_language || 'en';
   voice.serverTTS = Object.fromEntries(Object.entries(st.tts_server || {}).map(([k, v]) => [k, v.startsWith('piper')]));
+  if (st.lite) {   // free online demo: recognition in the browser, Telugu replies pre-recorded
+    voice.mode = 'browser'; voice.ttsMode = 'prerendered'; voice.serverTTS = { te: true };
+    voice.serverASR = Object.fromEntries((st.asr.server_languages || []).map(l => [l, true]));   // Telugu
+  }
   applyLanguage();
   lines.push(`speech recognition: ${Object.entries(st.asr.languages || {}).map(([k, v]) => `${k}: ${v}`).join(', ') || st.asr.detail}`);
   lines.push(`text-to-speech: ${voice.ttsLabel()}`);
@@ -330,7 +342,7 @@ async function loadStatus() {
   if (!st.selection.meets_minimum) lines.push('WARNING: ' + st.selection.problems.join(' '));
   $('modelStatus').textContent = lines.join('\n');
   $('privacy').textContent = st.privacy;
-  if (st.hosted) {   // be explicit: in hosted mode processing is NOT on the user's device
+  if (st.hosted && !st.lite) {   // be explicit: in hosted mode processing is NOT on the user's device
     const chip = $('localChip');
     chip.textContent = tr(S.lang, 'hosted_chip'); chip.className = 'chip warn'; chip.title = st.privacy;
     $('voiceStatus').textContent = st.privacy;

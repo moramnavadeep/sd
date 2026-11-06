@@ -1,12 +1,9 @@
-# Render Blueprint: New > Blueprint > pick this repo.
+# Render Blueprint for the FREE online demo (lite mode, see Dockerfile).
+# For body tracking on the server use Dockerfile.full on a plan with >= 2 GB RAM.
 services:
   - type: web
     name: saree-mirror
     runtime: docker
-    # The pose model + two speech models + TTS need ~1.5-2 GB RAM. The free (512 MB) and starter
-    # (512 MB) plans will run out of memory; "standard" (2 GB) is the smallest that fits.
-    plan: standard
+    dockerfilePath: ./Dockerfile
+    plan: free
     healthCheckPath: /healthz
-    envVars:
-      - key: MAX_SESSIONS
-        value: "2"

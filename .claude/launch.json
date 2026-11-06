@@ -4,8 +4,25 @@
     {
       "name": "saree-mirror",
       "runtimeExecutable": ".venv/Scripts/python.exe",
-      "runtimeArgs": ["-m", "backend.server"],
+      "runtimeArgs": [
+        "-m",
+        "backend.server"
+      ],
       "port": 8765
+    },
+    {
+      "name": "saree-mirror-lite",
+      "runtimeExecutable": ".venv/Scripts/python.exe",
+      "runtimeArgs": [
+        "-m",
+        "backend.server",
+        "--lite"
+      ],
+      "port": 8766,
+      "env": {
+        "HOST": "127.0.0.1",
+        "PORT": "8766"
+      }
     }
   ]
 }

@@ -9,7 +9,8 @@ MIN_RAM_GB = float(os.environ.get("MIN_RAM_GB", "4.0"))     # overridable for sm
 MIN_CPU_CORES = int(os.environ.get("MIN_CPU_CORES", "4"))
 
 
-def inspect() -> dict:
+def inspect(gpu: bool = True) -> dict:
+    """gpu=False skips importing torch (lite/free hosting: ~400 MB of RAM saved)."""
     info: dict = {"platform": platform.platform(), "python": platform.python_version(),
                   "cpu": platform.processor(), "cpu_logical": os.cpu_count()}
     try:
@@ -27,6 +28,8 @@ def inspect() -> dict:
         info["onnxruntime"] = None
         info["ort_providers"] = []
     try:
+        if not gpu:
+            raise ImportError
         import torch
         info["torch"] = torch.__version__
         info["cuda"] = torch.cuda.is_available()
