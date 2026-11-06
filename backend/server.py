@@ -125,6 +125,7 @@ def create_app(cfg: dict) -> FastAPI:
         return FileResponse(ROOT / "frontend" / "index.html")
 
     @app.get("/healthz")
+    @app.get("/health")          # Render's default health-check path
     def healthz():
         return {"ok": True}
 

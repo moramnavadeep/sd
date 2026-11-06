@@ -32,6 +32,11 @@ def test_lite_status_and_privacy(client):
     assert st["asr"]["server_languages"] == (["te"] if (ROOT / "models/asr/vosk-model-small-te-0.42").exists() else [])
 
 
+def test_health_endpoints(client):
+    assert client.get("/healthz").json() == {"ok": True}
+    assert client.get("/health").json() == {"ok": True}      # Render's default path (seen in the Render log)
+
+
 def test_lite_grammar_endpoint(client):
     g = client.get("/api/grammar?lang=te").json()
     assert "తరువాత" in g["phrases"] and g["phrases"][-1] == "[unk]"
