@@ -30,3 +30,22 @@ Visitors download the English speech model (≈ 40 MB) once; it is cached afterw
   command grammar, even with a grammar containing only the "next" phrases. Hence Telugu runs on the server.
 * Server-side Telugu: 3% of one i9 core in real time and 10/10 test commands recognised, measured
   on this PC. On Render's 0.1 CPU this is an estimate, not yet measured on Render itself.
+
+## Live deployment (2026-11-06)
+
+URL: **https://sd-3cwt.onrender.com** (Render free plan, `Dockerfile` lite image, auto-deploys from `main`).
+
+Verified on the live site:
+* Page loads with no script errors, and the privacy text shows. The Next button and the session
+  WebSocket (`wss://`) move the tutorial step.
+* Telugu voice (recognised on the server), streamed in real time from a recorded command:
+  "తరువాతి దశ" → next, **3/3**, answered about 0.85–0.97 s after the end of speech, on the free 0.1 CPU.
+* English model archive (41 MB), the vosk-browser engine, and the pre-recorded Telugu audio are all served.
+
+Not verified on the live site: in-browser English recognition with real audio (verified on the same
+lite code locally), real microphones, and phones.
+
+Fixed during deployment: Render checks `/health` (now served alongside `/healthz`); lite mode wrongly
+required onnxruntime and showed "device does not meet minimum requirements"; and an unescaped
+apostrophe broke `voice.js`, which `node --check file.js` did not detect
+(`tests/test_frontend_syntax.py` now checks every module as ESM).
